@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List
 from chroma_client import get_client
 from models import Document, Query
-from utils import get_openclip_embedding_function, get_image_loader
+from utils import (
+    get_openclip_embedding_function,
+    get_image_loader,
+    build_chroma_fields,
+)
 from security import encrypt_data, decrypt_data
 import logging
 from datetime import datetime
@@ -27,18 +31,10 @@ async def add_documents_task(collection_name: str, documents: List[Document]):
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
     
-    # Encrypt metadata before storing
-    # Ensure that every field list has the same length as ``documents``.
-    # Previously fields were filtered which caused mismatched lengths and
-    # triggered errors when adding to ChromaDB.
-    collection.add(
-        ids=[doc.id for doc in documents],
-        documents=[doc.text for doc in documents],
-        metadatas=[encrypt_data(str(doc.metadata)) if doc.metadata else None for doc in documents],
-        embeddings=[doc.embedding for doc in documents],
-        images=[doc.image for doc in documents],
-        uris=[doc.uri for doc in documents]
-    )
+    # Ensure that every field list has the same length as ``documents`` to
+    # avoid errors in ChromaDB operations.
+    fields = build_chroma_fields(documents)
+    collection.add(**fields)
 
 # Add documents to a collection (supports multimodal)
 @router.post("/add_documents/{collection_name}")
@@ -54,14 +50,8 @@ async def add_documents(collection_name: str, documents: List[Document]):
         )
 
         # Store all fields with consistent lengths to avoid errors
-        collection.add(
-            ids=[doc.id for doc in documents],
-            documents=[doc.text for doc in documents],
-            metadatas=[encrypt_data(str(doc.metadata)) if doc.metadata else None for doc in documents],
-            embeddings=[doc.embedding for doc in documents],
-            images=[doc.image for doc in documents],
-            uris=[doc.uri for doc in documents]
-        )
+        fields = build_chroma_fields(documents)
+        collection.add(**fields)
         return {"message": "Documents added successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -112,19 +102,9 @@ async def update_documents(collection_name: str, documents: List[Document]):
             for metadata in collection.get(ids=existing_ids)['metadatas']
         ]
 
-        # Encrypt the new metadata before updating
-        encrypted_metadata = [
-            encrypt_data(str(doc.metadata)) if doc.metadata else None
-            for doc in documents
-        ]
-
-        collection.update(
-            ids=[doc.id for doc in documents],
-            documents=[doc.text for doc in documents],
-            metadatas=encrypted_metadata,
-            embeddings=[doc.embedding for doc in documents],
-            images=[doc.image for doc in documents]
-        )
+        # Build field lists for the update, ensuring consistent lengths
+        fields = build_chroma_fields(documents)
+        collection.update(**fields)
 
         # Log the update action for SOC 2 compliance
         for doc in documents:
