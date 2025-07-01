@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from typing import Optional
 from chroma_client import get_client
 
 router = APIRouter()
