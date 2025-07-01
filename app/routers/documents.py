@@ -28,15 +28,16 @@ async def add_documents_task(collection_name: str, documents: List[Document]):
     collection = client.get_or_create_collection(name=collection_name)
     
     # Encrypt metadata before storing
-    encrypted_metadata = [encrypt_data(str(doc.metadata)) for doc in documents if doc.metadata]
-
+    # Ensure that every field list has the same length as ``documents``.
+    # Previously fields were filtered which caused mismatched lengths and
+    # triggered errors when adding to ChromaDB.
     collection.add(
         ids=[doc.id for doc in documents],
-        documents=[doc.text for doc in documents if doc.text],
-        metadatas=encrypted_metadata,
-        embeddings=[doc.embedding for doc in documents if doc.embedding],
-        images=[doc.image for doc in documents if doc.image],
-        uris=[doc.uri for doc in documents if doc.uri]
+        documents=[doc.text for doc in documents],
+        metadatas=[encrypt_data(str(doc.metadata)) if doc.metadata else None for doc in documents],
+        embeddings=[doc.embedding for doc in documents],
+        images=[doc.image for doc in documents],
+        uris=[doc.uri for doc in documents]
     )
 
 # Add documents to a collection (supports multimodal)
@@ -52,16 +53,14 @@ async def add_documents(collection_name: str, documents: List[Document]):
             data_loader=data_loader
         )
 
-        # Encrypt metadata before storing
-        encrypted_metadata = [encrypt_data(str(doc.metadata)) for doc in documents if doc.metadata]
-
+        # Store all fields with consistent lengths to avoid errors
         collection.add(
             ids=[doc.id for doc in documents],
-            documents=[doc.text for doc in documents if doc.text],
-            metadatas=encrypted_metadata,
-            embeddings=[doc.embedding for doc in documents if doc.embedding],
-            images=[doc.image for doc in documents if doc.image],
-            uris=[doc.uri for doc in documents if doc.uri]
+            documents=[doc.text for doc in documents],
+            metadatas=[encrypt_data(str(doc.metadata)) if doc.metadata else None for doc in documents],
+            embeddings=[doc.embedding for doc in documents],
+            images=[doc.image for doc in documents],
+            uris=[doc.uri for doc in documents]
         )
         return {"message": "Documents added successfully."}
     except Exception as e:
@@ -115,15 +114,16 @@ async def update_documents(collection_name: str, documents: List[Document]):
 
         # Encrypt the new metadata before updating
         encrypted_metadata = [
-            encrypt_data(str(doc.metadata)) for doc in documents if doc.metadata
+            encrypt_data(str(doc.metadata)) if doc.metadata else None
+            for doc in documents
         ]
 
         collection.update(
             ids=[doc.id for doc in documents],
-            documents=[doc.text for doc in documents if doc.text],
+            documents=[doc.text for doc in documents],
             metadatas=encrypted_metadata,
-            embeddings=[doc.embedding for doc in documents if doc.embedding],
-            images=[doc.image for doc in documents if doc.image]
+            embeddings=[doc.embedding for doc in documents],
+            images=[doc.image for doc in documents]
         )
 
         # Log the update action for SOC 2 compliance

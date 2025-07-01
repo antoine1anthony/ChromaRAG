@@ -14,4 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Run the FastAPI server
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# ``main.py`` lives inside the ``app`` package so we need to reference it as
+# ``app.main`` when starting Uvicorn. The previous command failed to locate the
+# module resulting in an import error.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
