@@ -1,3 +1,5 @@
+"""Helper utilities used across the API."""
+
 from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction
 from chromadb.utils.data_loaders import ImageLoader
 from typing import List, Dict
@@ -5,11 +7,13 @@ from models import Document
 from security import encrypt_data
 
 # Initialize the OpenCLIP embedding function
-def get_openclip_embedding_function():
+def get_openclip_embedding_function() -> OpenCLIPEmbeddingFunction:
+    """Return the default OpenCLIP embedding function."""
     return OpenCLIPEmbeddingFunction()
 
 # Initialize the ImageLoader for multimodal collections
-def get_image_loader():
+def get_image_loader() -> ImageLoader:
+    """Return the default image loader for multimodal content."""
     return ImageLoader()
 
 # Build lists of document fields for ChromaDB operations. This helper ensures

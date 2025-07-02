@@ -1,1 +1,1 @@
-# routers/__init__.py
+"""Package containing the API routers."""

@@ -1,3 +1,10 @@
+"""Application entry point for the FastAPI server.
+
+This module creates the :class:`FastAPI` instance, adds middleware and includes
+all API routers. Import ``app`` from this module when running with Uvicorn or
+for testing.
+"""
+
 from fastapi import FastAPI, Depends
 from routers import collections, documents
 from dependencies import get_api_key
