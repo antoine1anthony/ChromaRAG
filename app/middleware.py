@@ -1,9 +1,13 @@
+"""Middleware components used by the FastAPI application."""
+
 from fastapi import FastAPI, Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 import time
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Simple in-memory IP based rate limiting middleware."""
+
     def __init__(self, app: FastAPI, max_requests: int, time_window: int):
         super().__init__(app)
         self.max_requests = max_requests
@@ -11,6 +15,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.request_counts = {}
 
     async def dispatch(self, request: Request, call_next):
+        """Process each request and enforce rate limits."""
         client_ip = request.client.host
         current_time = time.time()
 
