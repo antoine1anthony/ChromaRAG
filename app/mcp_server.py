@@ -1,5 +1,5 @@
 from typing import List, Optional
-
+import json
 from mcp.server.fastmcp import FastMCP
 
 from chroma_client import get_client
@@ -83,7 +83,9 @@ def query_collection(collection_name: str, query: Query) -> dict:
         where_document=query.where_document,
         include=["documents", "metadatas", "embeddings", "distances"],
     )
-    results["metadatas"] = [decrypt_data(m) for m in results.get("metadatas", []) if m is not None]
+    results["metadatas"] = [
+        json.loads(decrypt_data(m)) for m in results.get("metadatas", [])
+    ]
     return results
 
 
