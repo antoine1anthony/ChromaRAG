@@ -50,6 +50,8 @@ def delete_collection(name: str) -> str:
 @mcp.tool()
 def add_document(collection_name: str, document: Document) -> str:
     """Add a single document to a collection."""
+    if not document.id:
+        raise ValueError("The document must have a valid 'id' that is not None or empty.")
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
 
