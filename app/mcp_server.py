@@ -39,6 +39,8 @@ def filter_collections_by_role(collections: List[str], role: str) -> List[str]:
 @mcp.tool()
 def create_collection(name: str) -> str:
     """Create a new collection."""
+    if not name or not isinstance(name, str):
+        raise ValueError("The collection name must be a non-empty string.")
     client = get_client()
     client.create_collection(name=name)
     return f"Collection {name} created"
