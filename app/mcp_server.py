@@ -26,7 +26,12 @@ def filter_collections_by_role(collections: List[str], role: str) -> List[str]:
     if role == "admin":
         return collections
 
-    # Placeholder for role-based filtering logic
+    # TODO: Implement proper role-based collection access control
+    # Currently, non-admin users cannot access any collections due to empty allowed list
+    # Future implementation should:
+    # - Define role-to-collection mappings in configuration or database
+    # - Support user-specific collection permissions
+    # - Allow granular access control (read/write permissions)
     allowed: List[str] = []
     return [c for c in collections if c in allowed]
 
