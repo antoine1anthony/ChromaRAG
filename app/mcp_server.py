@@ -1,0 +1,75 @@
+from typing import List, Optional
+
+from mcp.server.fastmcp import FastMCP
+
+from chroma_client import get_client
+from models import Document, Query
+from security import encrypt_data, decrypt_data
+
+mcp = FastMCP("ChromaRAG")
+
+
+@mcp.tool()
+def create_collection(name: str) -> str:
+    """Create a new collection."""
+    client = get_client()
+    client.create_collection(name=name)
+    return f"Collection {name} created"
+
+
+@mcp.tool()
+def delete_collection(name: str) -> str:
+    """Delete a collection."""
+    client = get_client()
+    client.delete_collection(name=name)
+    return f"Collection {name} deleted"
+
+
+@mcp.tool()
+def add_document(collection_name: str, document: Document) -> str:
+    """Add a single document to a collection."""
+    client = get_client()
+    collection = client.get_or_create_collection(name=collection_name)
+
+    metadata = encrypt_data(str(document.metadata)) if document.metadata else None
+
+    collection.add(
+        ids=[document.id],
+        documents=[document.text] if document.text else None,
+        metadatas=[metadata] if metadata else None,
+        embeddings=[document.embedding] if document.embedding else None,
+        images=[document.image] if document.image is not None else None,
+        uris=[document.uri] if document.uri else None,
+    )
+    return "Document added"
+
+
+@mcp.tool()
+def query_collection(collection_name: str, query: Query) -> dict:
+    """Query a collection."""
+    client = get_client()
+    collection = client.get_collection(name=collection_name)
+    results = collection.query(
+        query_texts=query.query_texts,
+        query_embeddings=query.query_embeddings,
+        query_images=query.query_images,
+        query_uris=query.query_uris,
+        n_results=query.n_results,
+        where=query.where,
+        where_document=query.where_document,
+        include=["documents", "metadatas", "embeddings", "distances"],
+    )
+    results["metadatas"] = [decrypt_data(m) for m in results.get("metadatas", [])]
+    return results
+
+
+@mcp.resource("chroma://collections")
+def list_collections() -> List[str]:
+    """List existing collection names."""
+    client = get_client()
+    cols = client.list_collections()
+    return [c.name if hasattr(c, "name") else c for c in cols]
+
+
+if __name__ == "__main__":
+    mcp.run()

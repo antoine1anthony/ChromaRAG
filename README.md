@@ -36,7 +36,8 @@ ChromaRAG/
 │   │   └── documents.py   # Endpoints related to documents
 │   ├── utils.py           # Utility functions, e.g., embedding functions
 │   ├── security.py        # Security functions for encryption and anonymization
-│   └── middleware.py      # Middleware for rate limiting
+│   ├── middleware.py      # Middleware for rate limiting
+│   └── mcp_server.py      # MCP server exposing Chroma tools
 ├── Dockerfile             # Dockerfile for the FastAPI app
 ├── docker-compose.yml     # Docker Compose configuration
 ├── requirements.txt       # Python dependencies
@@ -59,6 +60,18 @@ ChromaRAG/
 3. **Access the API**:
     - The API will be available at `http://localhost:8000`.
     - Swagger UI is available at `http://localhost:8000/docs`.
+
+## MCP Server
+
+This project includes an MCP server that exposes collection tools via the
+Model Context Protocol. You can run it with:
+
+```bash
+uv run mcp dev app/mcp_server.py
+```
+
+Clients compatible with MCP can then connect to interact with your
+collections and documents programmatically.
 
 ## Authentication
 
