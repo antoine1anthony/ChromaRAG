@@ -47,6 +47,8 @@ def create_collection(name: str) -> str:
 @mcp.tool()
 def delete_collection(name: str) -> str:
     """Delete a collection."""
+    if not name or not isinstance(name, str):
+        raise ValueError("The collection name must be a non-empty string.")
     client = get_client()
     client.delete_collection(name=name)
     return f"Collection {name} deleted"
