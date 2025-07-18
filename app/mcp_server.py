@@ -81,7 +81,7 @@ def query_collection(collection_name: str, query: Query) -> dict:
         where_document=query.where_document,
         include=["documents", "metadatas", "embeddings", "distances"],
     )
-    results["metadatas"] = [decrypt_data(m) for m in results.get("metadatas", [])]
+    results["metadatas"] = [decrypt_data(m) for m in results.get("metadatas", []) if m is not None]
     return results
 
 
