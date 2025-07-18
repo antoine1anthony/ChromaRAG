@@ -55,7 +55,7 @@ def add_document(collection_name: str, document: Document) -> str:
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
 
-    metadata = encrypt_data(json.dumps(document.metadata)) if document.metadata is not None else None
+    metadata = None if not document.metadata else encrypt_data(json.dumps(document.metadata))
 
     collection.add(
         ids=[document.id],
