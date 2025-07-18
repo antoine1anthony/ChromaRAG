@@ -60,7 +60,7 @@ def add_document(collection_name: str, document: Document) -> str:
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
 
-    metadata = encrypt_data(json.dumps(document.metadata)) if document.metadata else None
+    metadata = None if not document.metadata else encrypt_data(json.dumps(document.metadata))
 
     collection.add(
         ids=[document.id],
@@ -89,7 +89,7 @@ def query_collection(collection_name: str, query: Query) -> dict:
         include=["documents", "metadatas", "embeddings", "distances"],
     )
     results["metadatas"] = [
-        json.loads(decrypt_data(m)) for m in results.get("metadatas", [])
+        json.loads(decrypt_data(m)) if m is not None else None for m in results.get("metadatas", [])
     ]
     return results
 
