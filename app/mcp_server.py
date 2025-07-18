@@ -39,6 +39,8 @@ def filter_collections_by_role(collections: List[str], role: str) -> List[str]:
 @mcp.tool()
 def create_collection(name: str) -> str:
     """Create a new collection."""
+    if not name or not isinstance(name, str):
+        raise ValueError("The collection name must be a non-empty string.")
     client = get_client()
     client.create_collection(name=name)
     return f"Collection {name} created"
@@ -47,6 +49,8 @@ def create_collection(name: str) -> str:
 @mcp.tool()
 def delete_collection(name: str) -> str:
     """Delete a collection."""
+    if not name or not isinstance(name, str):
+        raise ValueError("The collection name must be a non-empty string.")
     client = get_client()
     client.delete_collection(name=name)
     return f"Collection {name} deleted"
@@ -56,11 +60,11 @@ def delete_collection(name: str) -> str:
 def add_document(collection_name: str, document: Document) -> str:
     """Add a single document to a collection."""
     if not document.id:
-        raise ValueError("The document must have a valid 'id' that is not None or empty.")
+        raise ValueError("Document ID cannot be None or empty string.")
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
 
-    metadata = None if not document.metadata else encrypt_data(json.dumps(document.metadata))
+    metadata = document.metadata if document.metadata else None
 
     collection.add(
         ids=[document.id],
@@ -76,6 +80,8 @@ def add_document(collection_name: str, document: Document) -> str:
 @mcp.tool()
 def query_collection(collection_name: str, query: Query) -> dict:
     """Query a collection."""
+    if not collection_name:
+        raise ValueError("The collection_name must be a non-empty string.")
     client = get_client()
     collection = client.get_collection(name=collection_name)
     results = collection.query(
@@ -88,9 +94,7 @@ def query_collection(collection_name: str, query: Query) -> dict:
         where_document=query.where_document,
         include=["documents", "metadatas", "embeddings", "distances"],
     )
-    results["metadatas"] = [
-        json.loads(decrypt_data(m)) if m is not None else None for m in results.get("metadatas", [])
-    ]
+    results["metadatas"] = [m for m in results.get("metadatas", [])]
     return results
 
 
