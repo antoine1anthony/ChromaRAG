@@ -80,6 +80,8 @@ def add_document(collection_name: str, document: Document) -> str:
 @mcp.tool()
 def query_collection(collection_name: str, query: Query) -> dict:
     """Query a collection."""
+    if not collection_name:
+        raise ValueError("The collection_name must be a non-empty string.")
     client = get_client()
     collection = client.get_collection(name=collection_name)
     results = collection.query(
