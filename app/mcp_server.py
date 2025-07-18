@@ -6,7 +6,29 @@ from chroma_client import get_client
 from models import Document, Query
 from security import encrypt_data, decrypt_data
 
+
 mcp = FastMCP("ChromaRAG")
+
+
+def get_user_role() -> str:
+    """Return the role for the current request.
+
+    This placeholder assumes every request comes from an admin.
+    In the future, this will be replaced with logic from the auth module.
+    """
+
+    return "admin"
+
+
+def filter_collections_by_role(collections: List[str], role: str) -> List[str]:
+    """Filter collections based on the provided role."""
+
+    if role == "admin":
+        return collections
+
+    # Placeholder for role-based filtering logic
+    allowed: List[str] = []
+    return [c for c in collections if c in allowed]
 
 
 @mcp.tool()
@@ -68,8 +90,11 @@ def list_collections() -> List[str]:
     """List existing collection names."""
     client = get_client()
     cols = client.list_collections()
-    return [c.name if hasattr(c, "name") else c for c in cols]
+    all_collections = [c.name if hasattr(c, "name") else c for c in cols]
+    role = get_user_role()
+    return filter_collections_by_role(all_collections, role)
 
 
 if __name__ == "__main__":
     mcp.run()
+
