@@ -60,7 +60,7 @@ def delete_collection(name: str) -> str:
 def add_document(collection_name: str, document: Document) -> str:
     """Add a single document to a collection."""
     if not document.id:
-        raise ValueError("The document must have a valid 'id' that is not None or empty.")
+        raise ValueError("Document ID cannot be None or empty string.")
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
 
