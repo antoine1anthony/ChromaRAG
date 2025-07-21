@@ -2,9 +2,8 @@ from typing import List, Optional
 import json
 from mcp.server.fastmcp import FastMCP
 
-from chroma_client import get_client
-from models import Document, Query
-from security import encrypt_data, decrypt_data
+from app.chroma_client import get_client
+from app.security import encrypt_data, decrypt_data
 
 
 mcp = FastMCP("ChromaRAG")
@@ -57,41 +56,41 @@ def delete_collection(name: str) -> str:
 
 
 @mcp.tool()
-def add_document(collection_name: str, document: Document) -> str:
+def add_document(collection_name: str, document_id: str, text: Optional[str] = None, metadata: Optional[dict] = None) -> str:
     """Add a single document to a collection."""
-    if not document.id:
+    if not document_id:
         raise ValueError("Document ID cannot be None or empty string.")
     client = get_client()
     collection = client.get_or_create_collection(name=collection_name)
 
-    metadata = None if not document.metadata else encrypt_data(json.dumps(document.metadata))
+    encrypted_metadata = None if not metadata else encrypt_data(json.dumps(metadata))
 
     collection.add(
-        ids=[document.id],
-        documents=[document.text] if document.text else None,
-        metadatas=[metadata] if metadata else None,
-        embeddings=[document.embedding] if document.embedding else None,
-        images=[document.image] if document.image is not None else None,
-        uris=[document.uri] if document.uri else None,
+        ids=[document_id],
+        documents=[text] if text else None,
+        metadatas=[encrypted_metadata] if encrypted_metadata else None,
+        embeddings=None,
+        images=None,
+        uris=None,
     )
     return "Document added"
 
 
 @mcp.tool()
-def query_collection(collection_name: str, query: Query) -> dict:
+def query_collection(collection_name: str, query_texts: Optional[List[str]] = None, n_results: int = 10) -> dict:
     """Query a collection."""
     if not collection_name:
         raise ValueError("The collection_name must be a non-empty string.")
     client = get_client()
     collection = client.get_collection(name=collection_name)
     results = collection.query(
-        query_texts=query.query_texts,
-        query_embeddings=query.query_embeddings,
-        query_images=query.query_images,
-        query_uris=query.query_uris,
-        n_results=query.n_results,
-        where=query.where,
-        where_document=query.where_document,
+        query_texts=query_texts,
+        query_embeddings=None,
+        query_images=None,
+        query_uris=None,
+        n_results=n_results,
+        where=None,
+        where_document=None,
         include=["documents", "metadatas", "embeddings", "distances"],
     )
     results["metadatas"] = [
