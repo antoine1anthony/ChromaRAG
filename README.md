@@ -45,6 +45,8 @@ ChromaRAG/
 
 ## Installation
 
+### Local Development
+
 1. **Clone the Repository**:
     ```bash
     git clone https://github.com/g3ntl3Giants/ChromaRAG.git
@@ -59,6 +61,46 @@ ChromaRAG/
 3. **Access the API**:
     - The API will be available at `http://localhost:8000`.
     - Swagger UI is available at `http://localhost:8000/docs`.
+
+### Deploy to Render.com
+
+ChromaRAG is configured for easy deployment on Render.com using the included `render.yaml` configuration file.
+
+#### Prerequisites
+- A [Render.com](https://render.com) account
+- Your code pushed to a GitHub repository
+
+#### Deployment Steps
+
+1. **Connect to Render**:
+   - Fork or push this repository to GitHub
+   - Connect your GitHub account to Render.com
+   - Create a new "Blueprint" service in Render
+
+2. **Configure Environment Variables**:
+   - Copy `.env.example` to `.env` and configure your values
+   - In Render dashboard, set the following environment variables:
+     - `API_KEY`: Your secure API key for authentication
+     - `SECRET_KEY`: Secret key for JWT tokens
+     - `ENVIRONMENT`: Set to "production"
+   
+3. **Deploy**:
+   - Select your repository and the `render-deployment-support` branch
+   - Render will automatically detect the `render.yaml` file
+   - Click "Apply" to deploy
+
+4. **Access Your Deployed API**:
+   - Your API will be available at `https://your-service-name.onrender.com`
+   - Swagger UI will be at `https://your-service-name.onrender.com/docs`
+
+#### Render Configuration Details
+
+The `render.yaml` file includes:
+- **Web Service**: FastAPI application with Docker runtime
+- **Database**: Optional PostgreSQL service for production use
+- **Auto-scaling**: 1-3 instances based on traffic
+- **Health checks**: Monitors `/docs` endpoint
+- **Environment**: Production-ready configuration
 
 ## Authentication
 

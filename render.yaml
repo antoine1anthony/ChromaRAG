@@ -1,0 +1,35 @@
+services:
+  # Web Service
+  - type: web
+    name: chromarag-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    region: oregon
+    branch: render-deployment-support
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: API_KEY
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+    domains:
+      - chromarag-api.onrender.com
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+    
+  # Database (using Render's PostgreSQL for persistence if needed)
+  # Note: ChromaDB uses SQLite by default, but for production you might want PostgreSQL
+  - type: pserv
+    name: chromarag-db
+    plan: starter
+    region: oregon
+    databaseName: chromarag
+    databaseUser: chromarag_user
