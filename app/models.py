@@ -15,8 +15,9 @@ class Document(BaseModel):
     uri: Optional[HttpUrl] = Field(None, description="Valid URI to the external data source")
 
 class Query(BaseModel):
-    model_config = {"arbitrary_types_allowed": True}
+ j    model_config = {"arbitrary_types_allowed": True}
     
+    """Query parameters used when searching a collection."""
     query_texts: Optional[List[str]] = Field(None, description="List of query texts")
     query_embeddings: Optional[List[List[float]]] = Field(
         None, description="List of embedding vectors"

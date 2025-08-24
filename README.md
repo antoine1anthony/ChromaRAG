@@ -60,6 +60,7 @@ ChromaRAG/
 3. **Access the API**:
     - The API will be available at `http://localhost:8000`.
     - Swagger UI is available at `http://localhost:8000/docs`.
+    - Additional endpoint documentation can be found in [docs/API.md](docs/API.md).
 
 ## MCP Server
 
