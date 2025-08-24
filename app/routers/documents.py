@@ -2,14 +2,10 @@
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List
-from chroma_client import get_client
-from models import Document, Query
-from utils import (
-    get_openclip_embedding_function,
-    get_image_loader,
-    build_chroma_fields,
-)
-from security import encrypt_data, decrypt_data
+from app.chroma_client import get_client
+from app.models import Document, Query
+from app.utils import get_openclip_embedding_function, get_image_loader
+from app.security import encrypt_data, decrypt_data
 import logging
 from datetime import datetime
 
