@@ -1,10 +1,13 @@
 """Helper utilities used across the API."""
 
-from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction
+import json
+from typing import Dict, List
+
 from chromadb.utils.data_loaders import ImageLoader
-from typing import List, Dict
-from models import Document
-from security import encrypt_data
+from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction
+
+from app.models import Document
+from app.security import encrypt_data
 
 # Initialize the OpenCLIP embedding function
 def get_openclip_embedding_function() -> OpenCLIPEmbeddingFunction:
@@ -25,7 +28,9 @@ def build_chroma_fields(documents: List[Document]) -> Dict[str, List]:
         "ids": [doc.id for doc in documents],
         "documents": [doc.text for doc in documents],
         "metadatas": [
-            encrypt_data(str(doc.metadata)) if doc.metadata else None
+            encrypt_data(json.dumps(doc.metadata, sort_keys=True, ensure_ascii=False))
+            if doc.metadata
+            else None
             for doc in documents
         ],
         "embeddings": [doc.embedding for doc in documents],

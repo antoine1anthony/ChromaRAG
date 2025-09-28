@@ -4,10 +4,21 @@ services:
   chromadb:
     image: chromadb/chromadb:latest
     volumes:
-      - ./data/chromadb:/data
-    command: chroma run --path /data/chromadb
+      - ./data:/data
+    command: chroma run --path /data
     ports:
       - "8001:8000"
+
+  postgres:
+    image: ankane/pgvector:latest
+    environment:
+      POSTGRES_DB: chromarag
+      POSTGRES_USER: chroma
+      POSTGRES_PASSWORD: chroma-password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   fastapi:
     build: .
@@ -15,7 +26,12 @@ services:
       - "8000:8000"
     depends_on:
       - chromadb
+      - postgres
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=http://chromadb:8001
+      - DATABASE_URL=http://chromadb:8000
+      - POSTGRES_URL=postgresql+psycopg://chroma:chroma-password@postgres:5432/chromarag
+
+volumes:
+  postgres-data:

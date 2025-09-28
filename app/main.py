@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import collections, documents
 from app.dependencies import get_api_key
 from app.middleware import RateLimitMiddleware
+from app.postgres_store import init_db
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -24,6 +25,13 @@ app.add_middleware(
 )
 
 app.add_middleware(RateLimitMiddleware, max_request=10, time_window=60)
+
+
+@app.on_event("startup")
+def startup_event() -> None:
+    """Initialise backing services when the API boots."""
+
+    init_db()
 
 # Include the routers with API key dependency
 app.include_router(collections.router, prefix="/collections", tags=["Collections"], dependencies=[Depends(get_api_key)])

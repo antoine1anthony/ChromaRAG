@@ -3,6 +3,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 from app.chroma_client import get_client
+from app.postgres_store import remove_collection
 
 router = APIRouter()
 
@@ -22,6 +23,7 @@ async def delete_collection(collection_name: str):
     try:
         client = get_client()
         client.delete_collection(name=collection_name)
+        remove_collection(collection_name)
         return {"message": f"Collection {collection_name} deleted successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

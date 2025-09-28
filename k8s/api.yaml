@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chromarag-api
+  namespace: chromarag
+spec:
+  selector:
+    app: chromarag-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chromarag-api
+  namespace: chromarag
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chromarag-api
+  template:
+    metadata:
+      labels:
+        app: chromarag-api
+    spec:
+      containers:
+        - name: chromarag-api
+          image: your-registry/chromarag:latest
+          imagePullPolicy: IfNotPresent
+          command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: chromarag-config
+                  key: DATABASE_URL
+            - name: CHROMA_PERSIST_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: chromarag-config
+                  key: CHROMA_PERSIST_PATH
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: chromarag-postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chromarag-postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: chromarag-postgres-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: chromarag-postgres-secret
+                  key: POSTGRES_HOST
+            - name: POSTGRES_URL
+              value: postgresql+psycopg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):5432/$(POSTGRES_DB)
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
