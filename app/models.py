@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, HttpUrl
-from typing import List, Dict, Optional, Annotated
+from typing import Dict, List, Optional
 import numpy as np
 
 class Document(BaseModel):
@@ -15,9 +15,9 @@ class Document(BaseModel):
     uri: Optional[HttpUrl] = Field(None, description="Valid URI to the external data source")
 
 class Query(BaseModel):
- j    model_config = {"arbitrary_types_allowed": True}
-    
     """Query parameters used when searching a collection."""
+
+    model_config = {"arbitrary_types_allowed": True}
     query_texts: Optional[List[str]] = Field(None, description="List of query texts")
     query_embeddings: Optional[List[List[float]]] = Field(
         None, description="List of embedding vectors"
@@ -26,4 +26,6 @@ class Query(BaseModel):
     query_uris: Optional[List[HttpUrl]] = Field(None, description="List of valid URIs to external data sources")
     n_results: int = Field(10, description="Number of results to return")
     where: Optional[Dict] = Field(None, description="Filter conditions based on metadata")
-    where_document: Optional[Dict] = Field(None, description="Filter conditions based on document content")
+    where_document: Optional[Dict] = Field(
+        None, description="Filter conditions based on document content"
+    )

@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: chromarag-api
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        value: http://chromarag-chromadb:8000
+      - key: POSTGRES_URL
+        fromDatabase:
+          name: chromarag-postgres
+          property: connectionString
+    dependsOn:
+      - chromarag-chromadb
+  - type: privateService
+    name: chromarag-chromadb
+    env: docker
+    plan: starter
+    image: chromadb/chromadb:latest
+    startCommand: chroma run --path /data
+    autoDeploy: true
+    envVars:
+      - key: CHROMA_SERVER_HOST
+        value: 0.0.0.0
+      - key: CHROMA_SERVER_HTTP_PORT
+        value: "8000"
+    disk:
+      name: chroma-data
+      mountPath: /data
+      sizeGB: 10
+
+databases:
+  - name: chromarag-postgres
+    plan: starter
+    databaseName: chromarag
+    user: chroma
+    ipAllowList: []
